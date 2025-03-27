@@ -12,6 +12,6 @@ interface NoteDao {
     fun getAllNotes(): Flow<List<Note>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertNote(note: Note): Long  // Returns the new row ID
+    suspend fun insertNote(note: Note)
 
 }

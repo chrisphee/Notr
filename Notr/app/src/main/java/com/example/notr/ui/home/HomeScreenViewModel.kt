@@ -12,40 +12,49 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.notr.NotrApplication
 import com.example.notr.data.Note
 import com.example.notr.data.NoteDao
+import com.example.notr.data.NoteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
-class HomeScreenViewModel(private val noteDao: NoteDao): ViewModel() {
+class HomeScreenViewModel(private val noteRepository: NoteRepository): ViewModel() {
     private val _uiState = MutableStateFlow(HomeScreenUiState())
     val uiState: StateFlow<HomeScreenUiState> = _uiState.asStateFlow()
 
     var currentUserEntry: String by mutableStateOf("")
         private set
 
-    /*
+    /**
      *   Updates the current user entry
      */
     fun updateCurrentUserEntry(updatedEntry: String) {
         currentUserEntry = updatedEntry
     }
 
-    /*
-     * User pressed save, so we add an entry
+    /**
+     * Saves user entry to the database
      */
     suspend fun addNote(entry: String) {
-        noteDao.insertNote(Note(entry = currentUserEntry))
+        noteRepository.insertNote(Note(entry = currentUserEntry))
         updateCurrentUserEntry("")
     }
 
-    /*
+    /**
+     * Clears the current entry
+     */
+    fun clearEntry() {
+        updateCurrentUserEntry("")
+    }
+
+
+    /**
      * Factory for initialisation
      */
     companion object {
         val factory : ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as NotrApplication)
-                HomeScreenViewModel(application.database.noteDao())
+                HomeScreenViewModel(application.container.noteRepository)
             }
         }
     }

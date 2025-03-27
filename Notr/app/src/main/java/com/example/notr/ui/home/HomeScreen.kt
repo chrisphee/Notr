@@ -50,9 +50,7 @@ fun HomeScreen(homeScreenViewmodel: HomeScreenViewModel = viewModel(factory = Ho
             modifier = modifier
         )
 
-        ControlBarComposable(
-            homeScreenViewmodel,
-            {})
+        ControlBarComposable(homeScreenViewmodel)
 
     }
 
@@ -93,50 +91,59 @@ fun TextBoxComposable(userEntry: String = "",
 
 @Composable
 fun ControlBarComposable(homeScreenViewmodel: HomeScreenViewModel,
-                         onDeleteButtonClicked: () -> Unit,
                          modifier: Modifier = Modifier) {
 
     val scope = rememberCoroutineScope()
 
-    Surface (
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight()){
-        Row (
+            .fillMaxHeight()
+    ) {
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            // Save Button here
-            Button(onClick = {
-                    scope.launch{
-                    homeScreenViewmodel.addNote(homeScreenViewmodel.currentUserEntry)
-                    }
-                             },
-                   modifier = modifier
-                       .width(164.dp)
-                       .height(96.dp)) {
-                Text(text = "SAVE",
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.headlineLarge,
-                    modifier = Modifier)
-            }
-            }
-
-            Spacer(modifier = Modifier.width(16.dp))
-
             // Save as and Delete button here
-            Column () {
-                Button(onClick = onDeleteButtonClicked,
-                       modifier = modifier
-                           .width(164.dp)
-                           .height(96.dp)) {
-                    Text(text = "DELETE",
+            Column() {
+                Button(
+                    onClick = { homeScreenViewmodel.clearEntry() },
+                    modifier = modifier
+                        .width(164.dp)
+                        .height(96.dp)
+                ) {
+                    Text(
+                        text = "DELETE",
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.headlineLarge,
-                        modifier = Modifier)
+                        modifier = Modifier
+                    )
                 }
             }
+
+
+            Spacer(modifier = Modifier.width(17.dp))
+
+            // Save Button here
+            Button(
+                onClick = {
+                    scope.launch {
+                        homeScreenViewmodel.addNote(homeScreenViewmodel.currentUserEntry)
+                    }
+                },
+                modifier = modifier
+                    .width(164.dp)
+                    .height(96.dp)
+            ) {
+                Text(
+                    text = "SAVE",
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.headlineLarge,
+                    modifier = Modifier
+                )
+            }
         }
+    }
 }
 
 
