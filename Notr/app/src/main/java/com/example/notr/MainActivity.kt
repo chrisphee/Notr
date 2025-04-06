@@ -13,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.compose.AppTheme
 import com.example.notr.ui.home.HomeScreen
+import com.example.notr.ui.storage.StorageScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -22,7 +23,8 @@ class MainActivity : ComponentActivity() {
             AppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     // Main entry of the program here
-                    HomeScreen()
+                    //HomeScreen()
+                    StorageScreen()
                 }
             }
         }

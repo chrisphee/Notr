@@ -57,7 +57,7 @@ fun HomeScreen(homeScreenViewmodel: HomeScreenViewModel = viewModel(factory = Ho
 }
 
 
-/*
+/**
  * Textbox where the user will enter their notes
  */
 @Composable
@@ -85,7 +85,7 @@ fun TextBoxComposable(userEntry: String = "",
     )
 }
 
-/*
+/**
  * Place where the buttons are (at the bottom of the screen)
  */
 
