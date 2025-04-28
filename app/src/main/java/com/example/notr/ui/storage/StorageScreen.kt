@@ -61,10 +61,12 @@ fun NoteEntryCard(note: Note = Note(-1, "TEST_ENTRY, TEST_ENTRY"),
             // Date, ID, and Delete button go here
             Row(verticalAlignment = Alignment.CenterVertically) {
 
+                /**
                 Text(text = note.id.toString(),
                     style = MaterialTheme.typography.titleLarge)
 
                 Spacer(modifier = Modifier.weight(1f))
+                */
 
                 Button(
                     onClick = {
