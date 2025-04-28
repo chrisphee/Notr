@@ -20,6 +20,12 @@ class StorageScreenViewModel(private val noteRepository: NoteRepository) : ViewM
         return noteRepository.getAllNotes()
     }
 
+    /**
+     * Retrieves all notes
+     */
+    suspend fun deleteNote(note: Note) {
+        noteRepository.deleteNote(note)
+    }
 
 
     /**

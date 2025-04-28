@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.compose.AppTheme
 import com.example.notr.data.Note
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 /**
  * Main storage screen composable
@@ -34,7 +36,7 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun StorageScreen(storageScreenViewModel: StorageScreenViewModel = viewModel(factory = StorageScreenViewModel.factory),
                   modifier:Modifier = Modifier) {
-    EntryList(storageScreenViewModel.getAllNotes())
+    EntryList(storageScreenViewModel.getAllNotes(), storageScreenViewModel)
 
 }
 
@@ -43,7 +45,10 @@ fun StorageScreen(storageScreenViewModel: StorageScreenViewModel = viewModel(fac
  */
 @Composable
 fun NoteEntryCard(note: Note = Note(-1, "TEST_ENTRY, TEST_ENTRY"),
+                  storageScreenViewModel: StorageScreenViewModel,
                   modifier: Modifier = Modifier){
+    val scope = rememberCoroutineScope()
+
     Card(colors = CardDefaults.cardColors(
         //contentColor = Color.Gray
         ),
@@ -62,7 +67,11 @@ fun NoteEntryCard(note: Note = Note(-1, "TEST_ENTRY, TEST_ENTRY"),
                 Spacer(modifier = Modifier.weight(1f))
 
                 Button(
-                    onClick = {}) {
+                    onClick = {
+                        scope.launch {
+                            storageScreenViewModel.deleteNote(note)
+                        }
+                    }) {
                     Text(text = "DELETE")
                 }
             }
@@ -79,7 +88,9 @@ fun NoteEntryCard(note: Note = Note(-1, "TEST_ENTRY, TEST_ENTRY"),
  * The list which displays and holds the NoteEntryCard
  */
 @Composable
-fun EntryList(notesListFlow: Flow<List<Note>>, modifier: Modifier = Modifier) {
+fun EntryList(notesListFlow: Flow<List<Note>>,
+              storageScreenViewModel: StorageScreenViewModel,
+              modifier: Modifier = Modifier) {
     // Convert from Flow<List<>> to List<>
     val notesList by notesListFlow.collectAsState(initial = emptyList())
 
@@ -89,18 +100,9 @@ fun EntryList(notesListFlow: Flow<List<Note>>, modifier: Modifier = Modifier) {
     ) {
         items(notesList) { note ->
             NoteEntryCard(
-                note = note
+                note = note,
+                storageScreenViewModel = storageScreenViewModel
             )
         }
-    }
-}
-
-
-
-@Preview
-@Composable
-fun NoteEntryCardPreview() {
-    AppTheme {
-        NoteEntryCard()
     }
 }

@@ -16,4 +16,9 @@ interface NoteRepository {
      * Insert an item into the database
      */
     suspend fun insertNote(note: Note)
+
+    /**
+     * Deletes a note
+     */
+    suspend fun deleteNote(note: Note)
 }
