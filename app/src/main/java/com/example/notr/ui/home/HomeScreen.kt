@@ -14,11 +14,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,18 +49,47 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(homeScreenViewmodel: HomeScreenViewModel = viewModel(factory = HomeScreenViewModel.factory),
                 modifier: Modifier = Modifier) {
+    val uiState by homeScreenViewmodel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-    Column (modifier = modifier.fillMaxSize()) {
-        TextBoxComposable(
-            onValueChanged = { homeScreenViewmodel.updateCurrentUserEntry(it) },
-            changedEntry = homeScreenViewmodel.currentUserEntry,
-            modifier = modifier
-        )
+    // For Snackbar notifications
+    LaunchedEffect(uiState.showNotification) {
+        if (uiState.showNotification) {
+            scope.launch {
+                val result = snackbarHostState.showSnackbar(
+                    message = uiState.notificationMessage,
+                    actionLabel = "Dismiss",
+                    // if error long, if not short
+                    duration = if (uiState.isError) SnackbarDuration.Long else SnackbarDuration.Short
+                )
 
-        ControlBarComposable(homeScreenViewmodel)
-
+                // Clear notification after snackbar is dismissed
+                if (result == SnackbarResult.Dismissed || result == SnackbarResult.ActionPerformed) {
+                    homeScreenViewmodel.clearNotification()
+                }
+            }
+        }
     }
 
+    // The input textbox and toolbar
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = modifier.fillMaxSize()
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            TextBoxComposable(
+                onValueChanged = { homeScreenViewmodel.updateCurrentUserEntry(it) },
+                changedEntry = homeScreenViewmodel.currentUserEntry,
+                modifier = modifier
+            )
+
+            ControlBarComposable(homeScreenViewmodel)
+        }
+    }
 }
 
 
@@ -122,7 +158,7 @@ fun ControlBarComposable(homeScreenViewmodel: HomeScreenViewModel,
             }
 
 
-            Spacer(modifier = Modifier.width(17.dp))
+            Spacer(modifier = Modifier.width(30.dp))
 
             // Save Button here
             Button(

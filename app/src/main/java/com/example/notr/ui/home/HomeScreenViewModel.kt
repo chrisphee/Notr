@@ -1,5 +1,6 @@
 package com.example.notr.ui.home
 
+import android.util.Log
 import android.view.View
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,8 +36,39 @@ class HomeScreenViewModel(private val noteRepository: NoteRepository): ViewModel
      * Saves user entry to the database
      */
     suspend fun addNote(entry: String) {
-        noteRepository.insertNote(Note(entry = currentUserEntry))
-        updateCurrentUserEntry("")
+
+        if (currentUserEntry != ""){
+            noteRepository.insertNote(Note(entry = currentUserEntry))
+            updateCurrentUserEntry("")
+            // TODO: DISPLAY "SAVED" NOTIFICATION
+            showNotification("Note Saved")
+        }
+        else {
+            // TODO: DISPLAY "CANNOT SAVE EMPTY" NOTIFICATION
+            Log.d("D", "EMPTY ENTRY ATTEMPTED")
+            showNotification("Cannot Save Empty Note")
+        }
+    }
+
+    /**
+     * Shows a notification to the user
+     */
+    private fun showNotification(message: String, isError: Boolean = false) {
+        _uiState.value = HomeScreenUiState(
+            showNotification = true,
+            notificationMessage = message,
+            isError = isError
+        )
+    }
+
+    /**
+     * Clears the current notification
+     */
+    fun clearNotification() {
+        _uiState.value = HomeScreenUiState(
+            showNotification = false,
+            isError = false
+        )
     }
 
     /**
@@ -63,5 +95,7 @@ class HomeScreenViewModel(private val noteRepository: NoteRepository): ViewModel
 }
 
 data class HomeScreenUiState(
-    var dummy: String = ""
+    val showNotification: Boolean = false,
+    val notificationMessage: String = "",
+    val isError: Boolean = false
 )
