@@ -27,6 +27,10 @@ class StorageScreenViewModel(private val noteRepository: NoteRepository) : ViewM
         noteRepository.deleteNote(note)
     }
 
+    /**
+     * Loads current entry to the home screen and allows the user to edit
+     */
+
 
     /**
      * Factory for initialisation

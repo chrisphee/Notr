@@ -47,13 +47,29 @@ import kotlinx.coroutines.launch
  */
 
 @Composable
-fun HomeScreen(homeScreenViewmodel: HomeScreenViewModel = viewModel(factory = HomeScreenViewModel.factory),
+fun HomeScreen(
+    noteId: Long? = null,
+    onNavigateBack: () -> Unit = {},
+    homeScreenViewmodel: HomeScreenViewModel = viewModel(factory = HomeScreenViewModel.factory),
                 modifier: Modifier = Modifier) {
     val uiState by homeScreenViewmodel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // For Snackbar notifications
+    // For EDIT/NEW mode
+    LaunchedEffect(noteId) {
+        if (noteId != null && noteId > 0) {
+            homeScreenViewmodel.loadNote(noteId)
+        } else {
+            // Reset for new note - but do it properly
+            homeScreenViewmodel.resetEditMode()
+        }
+    }
+
+
+
+
+    // For Snack bar notifications
     LaunchedEffect(uiState.showNotification) {
         if (uiState.showNotification) {
             scope.launch {
@@ -87,7 +103,8 @@ fun HomeScreen(homeScreenViewmodel: HomeScreenViewModel = viewModel(factory = Ho
                 modifier = modifier
             )
 
-            ControlBarComposable(homeScreenViewmodel)
+            ControlBarComposable(homeScreenViewmodel = homeScreenViewmodel,
+                onNavigateBack = onNavigateBack)
         }
     }
 }
@@ -127,6 +144,7 @@ fun TextBoxComposable(userEntry: String = "",
 
 @Composable
 fun ControlBarComposable(homeScreenViewmodel: HomeScreenViewModel,
+                         onNavigateBack: () -> Unit = {},
                          modifier: Modifier = Modifier) {
 
     val scope = rememberCoroutineScope()
@@ -141,6 +159,7 @@ fun ControlBarComposable(homeScreenViewmodel: HomeScreenViewModel,
             horizontalArrangement = Arrangement.Center
         ) {
             // Save as and Delete button here
+            // Delete button
             Column() {
                 Button(
                     onClick = { homeScreenViewmodel.clearEntry() },
@@ -160,11 +179,16 @@ fun ControlBarComposable(homeScreenViewmodel: HomeScreenViewModel,
 
             Spacer(modifier = Modifier.width(30.dp))
 
-            // Save Button here
+            // Save Button
             Button(
                 onClick = {
                     scope.launch {
+                        val wasInEditMode = homeScreenViewmodel.isEditMode
+
                         homeScreenViewmodel.addNote(homeScreenViewmodel.currentUserEntry)
+                        if (wasInEditMode) {
+                            onNavigateBack()
+                        }
                     }
                 },
                 modifier = modifier

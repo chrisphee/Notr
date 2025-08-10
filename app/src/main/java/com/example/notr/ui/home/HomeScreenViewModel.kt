@@ -22,8 +22,14 @@ class HomeScreenViewModel(private val noteRepository: NoteRepository): ViewModel
     private val _uiState = MutableStateFlow(HomeScreenUiState())
     val uiState: StateFlow<HomeScreenUiState> = _uiState.asStateFlow()
 
+    // Persistent Variables
     var currentUserEntry: String by mutableStateOf("")
         private set
+    var currentNoteId: Long? by mutableStateOf(null)
+
+    var isEditMode: Boolean by mutableStateOf(false)
+
+
 
     /**
      *   Updates the current user entry
@@ -38,10 +44,17 @@ class HomeScreenViewModel(private val noteRepository: NoteRepository): ViewModel
     suspend fun addNote(entry: String) {
 
         if (currentUserEntry != ""){
-            noteRepository.insertNote(Note(entry = currentUserEntry))
-            updateCurrentUserEntry("")
-            // TODO: DISPLAY "SAVED" NOTIFICATION
-            showNotification("Note Saved")
+            // We are editing an existing note, so UPDATE not INSERT
+            if (isEditMode && currentNoteId != null) {
+                noteRepository.updateNote(Note(id = currentNoteId!!, entry = currentUserEntry))
+                showNotification("Note Updated")
+            // New note so INSERT instead
+            } else {
+                noteRepository.insertNote(Note(entry = currentUserEntry))
+                updateCurrentUserEntry("")
+                // TODO: DISPLAY "SAVED" NOTIFICATION
+                showNotification("Note Saved")
+            }
         }
         else {
             // TODO: DISPLAY "CANNOT SAVE EMPTY" NOTIFICATION
@@ -49,6 +62,30 @@ class HomeScreenViewModel(private val noteRepository: NoteRepository): ViewModel
             showNotification("Cannot Save Empty Note")
         }
     }
+
+    /**
+     * Resets edit mode states
+     */
+    fun resetEditMode() {
+        currentUserEntry = ""
+        currentNoteId = null
+        isEditMode = false
+    }
+
+    /**
+     * Loads a note based on ID to the main editing text box to the persistent variables
+     */
+    suspend fun loadNote(noteId: Long) {
+        val note: Note? = noteRepository.getCustomNote(noteId)
+        if (note != null) {
+            currentNoteId = noteId
+            updateCurrentUserEntry(note.entry)
+            isEditMode = true
+        } else {
+            Log.d("D", "CANNOT RETRIEVE NOTE")
+        }
+    }
+
 
     /**
      * Shows a notification to the user

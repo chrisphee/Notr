@@ -1,5 +1,6 @@
 package com.example.notr.ui.storage
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,9 +35,13 @@ import kotlinx.coroutines.launch
  * Main storage screen composable
  */
 @Composable
-fun StorageScreen(storageScreenViewModel: StorageScreenViewModel = viewModel(factory = StorageScreenViewModel.factory),
+fun StorageScreen(
+    onNavigateToEdit: (Long) -> Unit = {},
+    storageScreenViewModel: StorageScreenViewModel = viewModel(factory = StorageScreenViewModel.factory),
                   modifier:Modifier = Modifier) {
-    EntryList(storageScreenViewModel.getAllNotes(), storageScreenViewModel)
+    EntryList(notesListFlow =  storageScreenViewModel.getAllNotes(),
+        storageScreenViewModel = storageScreenViewModel,
+        onNavigateToEdit = onNavigateToEdit)
 
 }
 
@@ -46,6 +51,7 @@ fun StorageScreen(storageScreenViewModel: StorageScreenViewModel = viewModel(fac
 @Composable
 fun NoteEntryCard(note: Note = Note(-1, "TEST_ENTRY, TEST_ENTRY"),
                   storageScreenViewModel: StorageScreenViewModel,
+                  onNavigateToEdit: (Long) -> Unit = {},
                   modifier: Modifier = Modifier){
     val scope = rememberCoroutineScope()
 
@@ -55,6 +61,10 @@ fun NoteEntryCard(note: Note = Note(-1, "TEST_ENTRY, TEST_ENTRY"),
         modifier = modifier
             .fillMaxWidth()
             .heightIn(min = 25.dp)
+            // User wants to edit the contents of the note
+            .clickable {
+                onNavigateToEdit(note.id)
+            }
 
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -92,6 +102,7 @@ fun NoteEntryCard(note: Note = Note(-1, "TEST_ENTRY, TEST_ENTRY"),
 @Composable
 fun EntryList(notesListFlow: Flow<List<Note>>,
               storageScreenViewModel: StorageScreenViewModel,
+              onNavigateToEdit: (Long) -> Unit = {},
               modifier: Modifier = Modifier) {
     // Convert from Flow<List<>> to List<>
     val notesList by notesListFlow.collectAsState(initial = emptyList())
@@ -103,7 +114,8 @@ fun EntryList(notesListFlow: Flow<List<Note>>,
         items(notesList) { note ->
             NoteEntryCard(
                 note = note,
-                storageScreenViewModel = storageScreenViewModel
+                storageScreenViewModel = storageScreenViewModel,
+                onNavigateToEdit = onNavigateToEdit
             )
         }
     }

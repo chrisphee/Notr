@@ -18,6 +18,17 @@ interface NoteRepository {
     suspend fun insertNote(note: Note)
 
     /**
+     * Gets a custom note by ID
+     */
+    suspend fun getCustomNote(id: Long): Note?
+
+    /**
+     * Updates current entry
+     */
+    suspend fun updateNote(note:Note)
+
+
+    /**
      * Deletes a note
      */
     suspend fun deleteNote(note: Note)
